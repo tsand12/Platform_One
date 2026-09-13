@@ -1,14 +1,21 @@
 extends CharacterBody2D
-
+## How to document GODOT functions: 
+## @tutorial: https://docs.godotengine.org/en/4.3/tutorials/scripting/gdscript/gdscript_documentation_comments.html
 var inputDict: Dictionary = {"D":"move_right", "A":"move_left"}
 
-const WALK_SPEED = 150.0
+const WALK_SPEED = 140.0
 const RUN_SPEED = 215.0
 const JUMP_VELOCITY = -300.0
 const DOUBLE_PRESS_TIMEOUT := 0.5
 
 # --- movement
 var move_speed: float = 150.0
+var direction: float = 0
+var canJumpAgain: bool = false
+var isDoubleTap: bool = false
+var hasMegaStomp: bool = true # TODO hard coded for now. Will implement this properly later
+var lastAnimation: String = "idle"
+var currentAnimation: String = "idle"
 # --- event monitoring vars
 var currentEvent: InputEvent = null
 var lastEvent: InputEvent = null
@@ -18,10 +25,15 @@ var keyDoublePressed: bool = false
 var isKeyHeld: bool = false
 
 # --- Game-Defined Actions. FIXME turn into ENUM class?
-var move_left: String = "move_left";
-var move_right: String = "move_right"
+#var move_left: String = "move_left";
+#var move_right: String = "move_right"
 
+# --- Animations
+@onready var player_animation: AnimatedSprite2D = $AnimatedSprite2D
 
+func _process(delta: float) -> void:
+	elapsedKeyTime += delta
+	
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
@@ -30,71 +42,63 @@ func _physics_process(delta: float) -> void:
 	# Handle jump.
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
+		canJumpAgain = true
+		
+	# Handle mega stomp
+	if(Input.is_action_just_pressed("down")):
+		print("Last Animation: " + lastAnimation + ", Current Animation: " + currentAnimation)
+		if (lastAnimation.match("airSpin")):
+			velocity.y -= JUMP_VELOCITY
 
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
 	
-	var direction := Input.get_axis(move_left, move_right)
+	direction = Input.get_axis("move_left", "move_right")
 	if direction:
 		velocity.x = direction * move_speed
 	else:
 		velocity.x = move_toward(velocity.x, 0, move_speed)
+	
+	
+	handleAnimations()	
+	handleDoubleJump()
 
 	move_and_slide()
 
-# Handles game-defined player actions.
-#
-#PARAMS: InputEvent, the user input
-#	unused event param must remain as this is an overriden native godot method
-#RETURNS: None		
+## Handles game-defined player actions.
+##
+## PARAMS: 
+##	- [code]event[\code]: the user input (type: InputEvent)
+##	unused event param must remain as this is an overriden native godot method
+##RETURNS: None		
 func _input(event: InputEvent) -> void:
 	currentEvent = event
-	handleDualMovement()
+	currentAnimation = $AnimatedSprite2D.animation
 	handleMovementSpeed()
 	
 	# sets "current" event to "last" event on key release
 	if(currentEvent.is_released()):
 		lastEvent = event
+		lastAnimation = currentAnimation
+		player_animation.play("idle")
 
-func _process(delta: float) -> void:
-	elapsedKeyTime += delta
-	
-	
-# Handles game-define player movements settings and default Godot-defined player movements.
-#
-#PARAMS: None
-#RETURNS: None		
-func handleDualMovement() -> void:	
-	if Input.is_action_just_pressed("ui_left"):
-		move_left = "ui_left"
-	elif Input.is_action_just_pressed("move_left"):
-		move_left = "move_left"
-	elif Input.is_action_just_pressed("ui_right"):
-		move_right = "ui_right"
-	elif Input.is_action_just_pressed("move_right"):
-		move_right = "move_right"
 #
 #
 # TODO check this out if stuck: https://forum.godotengine.org/t/double-inputs-in-godot/119104
 func handleMovementSpeed() -> void:
 	if(Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("move_left")):
-		if(keyPressedTwice()):
-			print(currentEvent.as_text() + " pressed TWICE!")
-			if(isWithinTimeLimit(elapsedKeyTime, DOUBLE_PRESS_TIMEOUT)):				
-				print("increasing movement speed!!")
-				move_speed = RUN_SPEED
-			else:
-				print("set to walk speed!!, " + "time elapsed: " + str(elapsedKeyTime) + " , timeout: " + str(DOUBLE_PRESS_TIMEOUT))
-				move_speed = WALK_SPEED
-				elapsedKeyTime = 0
+		if(detectedDoubleTap()):
+			move_speed = RUN_SPEED
 		else:
+			#print("set to walk speed!!, " + "time elapsed: " + str(elapsedKeyTime) + " , timeout: " + str(DOUBLE_PRESS_TIMEOUT))
 			move_speed = WALK_SPEED
-		
-		print("movement speed: " + str(move_speed))
+			elapsedKeyTime = 0
+	
+	print("movement speed: " + str(move_speed))
 
-# Detects if any key was pressed twice
-# PARAMS: none
-# RETURNS: bool -> returns true if a key has been pressed twice.
+## Detects if any key was pressed twice
+## [b]Parameters:[/b]: none
+## RETURNS: bool -> returns true if a key has been pressed twice.
 func keyPressedTwice() -> bool:
 	#print("Last Button Pressed: " +  lastEvent.as_text() + ", Current button press: " + currentEvent.as_text())
 	if(lastEvent.as_text() != currentEvent.as_text()):
@@ -111,7 +115,47 @@ func keyPressedTwice() -> bool:
 func isWithinTimeLimit(timeElapsed: float, timeout: float) -> bool:
 	return timeElapsed <= timeout
 	
-	
+func handleAnimations() -> void:			# Play animations
+	# TODO create player state to build this out more	
+	if is_on_floor():
+		if direction == 0:
+			player_animation.play("idle")
+		else:
+			if(direction > 0):
+				player_animation.flip_h = false
+			else:
+				player_animation.flip_h = true
+			player_animation.play("run")
+	else:
+		if(isDoubleTap and hasMegaStomp):
+			player_animation.play("airSpin")
+		else:
+			player_animation.play("jump")
+		
+func detectedDoubleTap() -> bool:
+	if(keyPressedTwice()):
+		#print(currentEvent.as_text() + " pressed TWICE!")
+		if(isWithinTimeLimit(elapsedKeyTime, DOUBLE_PRESS_TIMEOUT)):				
+			#print("increasing movement speed!!")
+			isDoubleTap = true;
+			return true
+		else:
+			#print("set to walk speed!!, " + "time elapsed: " + str(elapsedKeyTime) + " , timeout: " + str(DOUBLE_PRESS_TIMEOUT))				
+			elapsedKeyTime = 0
+			isDoubleTap = false;
+			return false
+	else:
+		isDoubleTap = false;
+		return false
+			
+func handleDoubleJump() -> void:
+	if(canJumpAgain):
+		if(Input.is_action_just_pressed("jump") and detectedDoubleTap()):
+			if(!is_on_floor()):
+				handleAnimations()
+				velocity.y = JUMP_VELOCITY
+				canJumpAgain = false
+			
 	
 # TODO get player to run on double press -- DONE
 # TODO get player animation to change between "walk" and "run"
