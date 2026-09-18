@@ -94,7 +94,7 @@ func handleMovementSpeed() -> void:
 			move_speed = WALK_SPEED
 			elapsedKeyTime = 0
 	
-	#print("movement speed: " + str(move_speed))
+	print("movement speed: " + str(move_speed))
 
 ## Detects if any key was pressed twice
 ## [b]Parameters:[/b]: none
@@ -149,8 +149,6 @@ func detectedDoubleTap() -> bool:
 		return false
 			
 func handleDoubleJump() -> void:	
-	print("button pressed: " + currentEvent.as_text())
-	print("can jump again?: " + str(canJumpAgain))
 	if(canJumpAgain):
 		if(Input.is_action_just_pressed("jump") and detectedDoubleTap()):
 			if(!is_on_floor()):
