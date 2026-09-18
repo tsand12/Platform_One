@@ -6,14 +6,14 @@ var inputDict: Dictionary = {"D":"move_right", "A":"move_left"}
 const WALK_SPEED = 140.0
 const RUN_SPEED = 215.0
 const JUMP_VELOCITY = -300.0
-const DOUBLE_PRESS_TIMEOUT := 0.5
+const DOUBLE_PRESS_TIMEOUT := 0.7
 
 # --- movement
 var move_speed: float = 150.0
 var direction: float = 0
 var canJumpAgain: bool = false
 var isDoubleTap: bool = false
-var hasMegaStomp: bool = true # TODO hard coded for now. Will implement this properly later
+var hasMegaStomp: bool = false  # TODO hard coded for now. Will implement this properly later
 var lastAnimation: String = "idle"
 var currentAnimation: String = "idle"
 # --- event monitoring vars
@@ -94,7 +94,7 @@ func handleMovementSpeed() -> void:
 			move_speed = WALK_SPEED
 			elapsedKeyTime = 0
 	
-	print("movement speed: " + str(move_speed))
+	#print("movement speed: " + str(move_speed))
 
 ## Detects if any key was pressed twice
 ## [b]Parameters:[/b]: none
@@ -148,7 +148,9 @@ func detectedDoubleTap() -> bool:
 		isDoubleTap = false;
 		return false
 			
-func handleDoubleJump() -> void:
+func handleDoubleJump() -> void:	
+	print("button pressed: " + currentEvent.as_text())
+	print("can jump again?: " + str(canJumpAgain))
 	if(canJumpAgain):
 		if(Input.is_action_just_pressed("jump") and detectedDoubleTap()):
 			if(!is_on_floor()):
