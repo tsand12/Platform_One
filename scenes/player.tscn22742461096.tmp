@@ -365,7 +365,7 @@ position = Vector2(0, -12)
 sprite_frames = SubResource("SpriteFrames_tuyoq")
 animation = &"stomp"
 autoplay = "idle"
-frame_progress = 0.2575236
+frame_progress = 0.040715028
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -6)
