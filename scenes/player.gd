@@ -13,7 +13,9 @@ var move_speed: float = 150.0
 var direction: float = 0
 var canJumpAgain: bool = false
 var isDoubleTap: bool = false
-var hasMegaStomp: bool = false  # TODO hard coded for now. Will implement this properly later
+var isMegaStompEnabled: bool = true  # TODO hard coded for now. Will implement this properly later
+var isMegaStompWindow: bool = false
+var isMegaStompActive: bool = false
 var lastAnimation: String = "idle"
 var currentAnimation: String = "idle"
 # --- event monitoring vars
@@ -43,12 +45,11 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 		canJumpAgain = true
+		isMegaStompActive = false
 		
 	# Handle mega stomp
-	if(Input.is_action_just_pressed("down")):
-		print("Last Animation: " + lastAnimation + ", Current Animation: " + currentAnimation)
-		if (lastAnimation.match("airSpin")):
-			velocity.y -= JUMP_VELOCITY
+	if(detectedMegaStomp()):
+		velocity.y -= JUMP_VELOCITY
 
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
@@ -82,39 +83,38 @@ func _input(event: InputEvent) -> void:
 		lastAnimation = currentAnimation
 		player_animation.play("idle")
 
-#
-#
-# TODO check this out if stuck: https://forum.godotengine.org/t/double-inputs-in-godot/119104
+## Increases player movement speed when left/right buttons are double tapped, set to default speed otherwise
+##
 func handleMovementSpeed() -> void:
 	if(Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("move_left")):
 		if(detectedDoubleTap()):
 			move_speed = RUN_SPEED
 		else:
-			#print("set to walk speed!!, " + "time elapsed: " + str(elapsedKeyTime) + " , timeout: " + str(DOUBLE_PRESS_TIMEOUT))
 			move_speed = WALK_SPEED
 			elapsedKeyTime = 0
 	
-	print("movement speed: " + str(move_speed))
 
 ## Detects if any key was pressed twice
 ## [b]Parameters:[/b]: none
 ## RETURNS: bool -> returns true if a key has been pressed twice.
 func keyPressedTwice() -> bool:
-	#print("Last Button Pressed: " +  lastEvent.as_text() + ", Current button press: " + currentEvent.as_text())
 	if(lastEvent.as_text() != currentEvent.as_text()):
 		elapsedKeyTime = 0
 		return false;
 	else:
 		return true
 
-# checks if a Time component falls within a boundary/limit.
-#PARAMS: 
-#	timeElapsed (float): The delta from some native process function
-#	timeout (float): The boundary/limit, can be custom 
-#RETURNS: bool -> true if timeElapsed is less than or equal to the set timeout value
+## checks if a Time component falls within a boundary/limit.
+##PARAMS: 
+##	timeElapsed (float): The delta from some native process function
+##	timeout (float): The boundary/limit, can be custom 
+##RETURNS: bool -> true if timeElapsed is less than or equal to the set timeout value
 func isWithinTimeLimit(timeElapsed: float, timeout: float) -> bool:
 	return timeElapsed <= timeout
-	
+
+
+## Determines which animation to play based on user input and player state
+##			
 func handleAnimations() -> void:			# Play animations
 	# TODO create player state to build this out more	
 	if is_on_floor():
@@ -127,27 +127,29 @@ func handleAnimations() -> void:			# Play animations
 				player_animation.flip_h = true
 			player_animation.play("run")
 	else:
-		if(isDoubleTap and hasMegaStomp):
+		if(isMegaStompWindow):
 			player_animation.play("airSpin")
 		else:
 			player_animation.play("jump")
-		
+
+## Detects if any key has been hit twice within a short timeframe
+##
+## RETURNS: boolean if a key was double tapped					
 func detectedDoubleTap() -> bool:
 	if(keyPressedTwice()):
-		#print(currentEvent.as_text() + " pressed TWICE!")
 		if(isWithinTimeLimit(elapsedKeyTime, DOUBLE_PRESS_TIMEOUT)):				
-			#print("increasing movement speed!!")
 			isDoubleTap = true;
 			return true
 		else:
-			#print("set to walk speed!!, " + "time elapsed: " + str(elapsedKeyTime) + " , timeout: " + str(DOUBLE_PRESS_TIMEOUT))				
 			elapsedKeyTime = 0
 			isDoubleTap = false;
 			return false
 	else:
 		isDoubleTap = false;
 		return false
-			
+
+## Adjusts jump height if double jump is detected
+##						
 func handleDoubleJump() -> void:	
 	if(canJumpAgain):
 		if(Input.is_action_just_pressed("jump") and detectedDoubleTap()):
@@ -155,10 +157,22 @@ func handleDoubleJump() -> void:
 				handleAnimations()
 				velocity.y = JUMP_VELOCITY
 				canJumpAgain = false
-			
-	
-# TODO get player to run on double press -- DONE
-# TODO get player animation to change between "walk" and "run"
-# TODO clean up "move_left" and "ui_left" option. Have both detected as left instead of check for them individually
 
-	
+## Detects if user input initiates mega stomp
+##
+## RETURNS: boolean if mega stomp can be performed				
+func detectedMegaStomp() -> bool:	
+	if(!isMegaStompEnabled):
+		return false
+	elif(Input.is_action_just_pressed("jump")):
+		if(isMegaStompWindow and !is_on_floor()):
+			isMegaStompWindow = false
+			return true
+		elif(detectedDoubleTap()):
+			isMegaStompWindow = true
+			return false
+		else:
+			isMegaStompWindow = false
+			return false
+	else:
+		return false
