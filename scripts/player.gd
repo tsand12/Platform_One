@@ -1,8 +1,9 @@
 extends CharacterBody2D
+
+class_name Player
 ## How to document GODOT functions: 
 ## @tutorial: https://docs.godotengine.org/en/4.3/tutorials/scripting/gdscript/gdscript_documentation_comments.html
 var inputDict: Dictionary = {"D":"move_right", "A":"move_left"}
-
 const WALK_SPEED = 140.0
 const RUN_SPEED = 215.0
 const JUMP_VELOCITY = -300.0
@@ -13,7 +14,7 @@ var move_speed: float = 150.0
 var direction: float = 0
 var canJumpAgain: bool = false
 var isDoubleTap: bool = false
-var isMegaStompEnabled: bool = true  # TODO hard coded for now. Will implement this properly later
+var isMegaStompEnabled: bool = false  # TODO hard coded for now. Will implement this properly later
 var isMegaStompWindow: bool = false
 var isMegaStompActive: bool = false
 var lastAnimation: String = "idle"
@@ -30,9 +31,11 @@ var isKeyHeld: bool = false
 #var move_left: String = "move_left";
 #var move_right: String = "move_right"
 
+## ------- variables tied to State Machines
+var coins: int
 # --- Animations
 @onready var player_animation: AnimatedSprite2D = $AnimatedSprite2D
-
+	
 func _process(delta: float) -> void:
 	elapsedKeyTime += delta
 	
@@ -72,7 +75,7 @@ func _physics_process(delta: float) -> void:
 ##	- [code]event[\code]: the user input (type: InputEvent)
 ##	unused event param must remain as this is an overriden native godot method
 ##RETURNS: None		
-func _input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:	
 	currentEvent = event
 	currentAnimation = $AnimatedSprite2D.animation
 	handleMovementSpeed()
@@ -98,6 +101,9 @@ func handleMovementSpeed() -> void:
 ## [b]Parameters:[/b]: none
 ## RETURNS: bool -> returns true if a key has been pressed twice.
 func keyPressedTwice() -> bool:
+	if(lastEvent == null):
+		return false
+		
 	if(lastEvent.as_text() != currentEvent.as_text()):
 		elapsedKeyTime = 0
 		return false;
