@@ -33,6 +33,7 @@ var isKeyHeld: bool = false
 
 ## ------- variables tied to State Machines
 var coins: int
+@onready var coin_data: CoinState = $CoinData
 # --- Animations
 @onready var player_animation: AnimatedSprite2D = $AnimatedSprite2D
 	
@@ -76,6 +77,8 @@ func _physics_process(delta: float) -> void:
 ##	unused event param must remain as this is an overriden native godot method
 ##RETURNS: None		
 func _input(event: InputEvent) -> void:	
+	if(coin_data != null and coin_data.coins > 0):
+		print("Coins attached to Player. Count:  " + str(coin_data.coins))
 	currentEvent = event
 	currentAnimation = $AnimatedSprite2D.animation
 	handleMovementSpeed()

@@ -1,13 +1,14 @@
-[gd_scene load_steps=8 format=4 uid="uid://fai0yr4q1wp6"]
+[gd_scene load_steps=9 format=4 uid="uid://fai0yr4q1wp6"]
 
-[ext_resource type="Texture2D" uid="uid://6bdlm1f8d7he" path="res://assets/sprites/world_tileset.png" id="1_e2o6t"]
-[ext_resource type="PackedScene" uid="uid://pnb0jr0banhe" path="res://scenes/moving_platform.tscn" id="2_feb5d"]
-[ext_resource type="PackedScene" uid="uid://bbprpfvm84grh" path="res://scenes/player.tscn" id="3_feb5d"]
-[ext_resource type="PackedScene" uid="uid://vwqxa0saimka" path="res://scenes/dead_zone.tscn" id="4_fc0e3"]
-[ext_resource type="PackedScene" uid="uid://dumv2bdee8hof" path="res://scenes/coin.tscn" id="5_7jktm"]
+[ext_resource type="Script" uid="uid://dm8val8afbk12" path="res://scripts/game_manager.gd" id="1_p57ef"]
+[ext_resource type="Texture2D" uid="uid://6bdlm1f8d7he" path="res://assets/sprites/world_tileset.png" id="2_u5sy4"]
+[ext_resource type="PackedScene" uid="uid://pnb0jr0banhe" path="res://scenes/moving_platform.tscn" id="3_gee14"]
+[ext_resource type="PackedScene" uid="uid://bbprpfvm84grh" path="res://scenes/player.tscn" id="4_0tnpc"]
+[ext_resource type="PackedScene" uid="uid://vwqxa0saimka" path="res://scenes/dead_zone.tscn" id="5_vtaks"]
+[ext_resource type="PackedScene" uid="uid://dumv2bdee8hof" path="res://scenes/coin.tscn" id="6_kvpfn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fc0e3"]
-texture = ExtResource("1_e2o6t")
+texture = ExtResource("2_u5sy4")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:0/0 = 0
@@ -171,7 +172,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_fc0e3")
 
 [node name="Game" type="Node2D"]
-position = Vector2(646, 494)
+script = ExtResource("1_p57ef")
 
 [node name="Level1" type="Node2D" parent="."]
 
@@ -187,85 +188,85 @@ tile_map_data = PackedByteArray("AADX/wcAAAAAAA0AAADY/wcAAAAAAA0AAADZ/wcAAAAAAA0
 tile_set = SubResource("TileSet_7jktm")
 collision_enabled = false
 
-[node name="MovingPlatform" parent="Level1" instance=ExtResource("2_feb5d")]
+[node name="MovingPlatform" parent="Level1" instance=ExtResource("3_gee14")]
 position = Vector2(-610, -18)
 
-[node name="Player" parent="Level1" instance=ExtResource("3_feb5d")]
+[node name="Player" parent="Level1" instance=ExtResource("4_0tnpc")]
 position = Vector2(-617, -26)
 
 [node name="Camera2D" type="Camera2D" parent="Level1"]
 position = Vector2(-48, -20)
 
-[node name="DeadZone" parent="Level1" instance=ExtResource("4_fc0e3")]
+[node name="DeadZone" parent="Level1" instance=ExtResource("5_vtaks")]
 position = Vector2(0, 411)
 
 [node name="coins" type="Node2D" parent="Level1"]
 position = Vector2(-617, -26)
 
-[node name="coin" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(403, 195)
 
-[node name="coin2" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin2" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(323, -76)
 
-[node name="coin3" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin3" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(547, -76)
 
-[node name="coin4" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin4" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(262, 50)
 
-[node name="coin5" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin5" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(321, 115)
 
-[node name="coin6" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin6" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(336, 114)
 
-[node name="coin7" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin7" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(370, 115)
 
-[node name="coin8" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin8" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(386, 114)
 
-[node name="coin9" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin9" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(321, 102)
 
-[node name="coin10" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin10" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(337, 101)
 
-[node name="coin11" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin11" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(386, 99)
 
-[node name="coin12" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin12" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(370, 99)
 
-[node name="coin13" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin13" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(287, 50)
 
-[node name="coin14" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin14" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(208, -60)
 
-[node name="coin15" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin15" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(610, -186)
 
-[node name="coin16" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin16" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(915, 146)
 
-[node name="coin17" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin17" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(1010, 210)
 
-[node name="coin18" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin18" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(978, 211)
 
-[node name="coin19" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin19" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(851, -449)
 
-[node name="coin20" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin20" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(1090, -335)
 
-[node name="coin21" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin21" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(705, -333)
 
-[node name="coin22" parent="Level1/coins" instance=ExtResource("5_7jktm")]
+[node name="coin22" parent="Level1/coins" instance=ExtResource("6_kvpfn")]
 position = Vector2(785, -383)
 
 [connection signal="ready" from="Level1/coins" to="Level1/Player" method="_on_coins_ready"]

@@ -5,6 +5,7 @@ class_name PickupState
 enum States {PICKUP_AVAILABLE, PICKUP_EQUIPPED, PICKUP_ACTIVE, PICKUP_EXPIRED}
 var initial_state = States.PICKUP_AVAILABLE
 var current_state
+var pickupCount: int = 0
 
 func is_equipped() -> bool:
 	return current_state == States.PICKUP_EQUIPPED
@@ -41,6 +42,7 @@ func update_pickup_state(state: States)-> void:
 ### Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	current_state = initial_state
+	GameManager.update_coin_state(current_state)
 
 
 ## Called every frame. 'delta' is the elapsed time since the previous frame.
